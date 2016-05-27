@@ -30,7 +30,7 @@ func (board *Board) findSurroundingCells(col, row int) []*cell {
 				continue
 			}
 
-			cells = append(cells, &board.cells[col][row])
+			cells = append(cells, &board.cells[curCol][curRow])
 		}
 	}
 
@@ -73,7 +73,7 @@ func (board *Board) initCells() {
 }
 
 func (board *Board) isValidCoord(col, row int) bool {
-	if col < 0 || row < 0 || col > board.colCount || row > board.rowCount {
+	if col < 0 || row < 0 || col >= board.colCount || row >= board.rowCount {
 		return false
 	}
 
