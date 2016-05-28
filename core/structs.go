@@ -1,9 +1,5 @@
 package core
 
-type cellLocation struct {
-	col, row int
-}
-
 type cell struct {
 	board              *Board
 	locCol, locRow     int
@@ -14,7 +10,7 @@ type cell struct {
 
 // Board manages the Mines-Go game, from board to rules.
 type Board struct {
-	cells              [][]cell
+	cells              []cell
 	rowCount, colCount int
 	seed               int64
 }

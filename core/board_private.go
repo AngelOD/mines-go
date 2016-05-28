@@ -18,7 +18,7 @@ func (board *Board) findProximityMineCount(col, row int) {
 		}
 	}
 
-	board.cells[col][row].proximityMineCount = mineCount
+	board.cells[board.getIndexFromLocation(col, row)].proximityMineCount = mineCount
 }
 
 func (board *Board) findSurroundingCells(col, row int) []*cell {
@@ -30,11 +30,24 @@ func (board *Board) findSurroundingCells(col, row int) []*cell {
 				continue
 			}
 
-			cells = append(cells, &board.cells[curCol][curRow])
+			cells = append(cells, &board.cells[board.getIndexFromLocation(curCol, curRow)])
 		}
 	}
 
 	return cells
+}
+
+func (board *Board) getIndexFromLocation(col, row int) (index int) {
+	index = row*board.colCount + col
+
+	return
+}
+
+func (board *Board) getLocationFromIndex(index int) (col, row int) {
+	col = index % board.colCount
+	row = index / board.colCount
+
+	return
 }
 
 func (board *Board) init(numCols, numRows, numMines int) (err error) {
@@ -63,13 +76,24 @@ func (board *Board) init(numCols, numRows, numMines int) (err error) {
 }
 
 func (board *Board) initCells() {
-	for i := 0; i < board.colCount; i++ {
-		var rowSlice []cell
-		for j := 0; j < board.rowCount; j++ {
-			rowSlice = append(rowSlice, newCell(board, i, j))
+	var cells []cell
+	var curCol, curRow int
+
+	for {
+		cells = append(cells, newCell(board, curCol, curRow))
+
+		curCol++
+		if curCol == board.colCount {
+			curCol = 0
+
+			curRow++
+			if curRow == board.rowCount {
+				break
+			}
 		}
-		board.cells = append(board.cells, rowSlice)
 	}
+
+	board.cells = cells
 }
 
 func (board *Board) isValidCoord(col, row int) bool {
@@ -81,13 +105,13 @@ func (board *Board) isValidCoord(col, row int) bool {
 }
 
 func (board *Board) placeMines(mineCount int) {
-	var locs []cellLocation
+	var locs []int
 	var minesPlaced int
 
 	// Generate pseudo-set of possible locations
 	for i := 0; i < board.colCount; i++ {
 		for j := 0; j < board.rowCount; j++ {
-			locs = append(locs, cellLocation{col: i, row: j})
+			locs = append(locs, board.getIndexFromLocation(i, j))
 		}
 	}
 
@@ -100,7 +124,7 @@ func (board *Board) placeMines(mineCount int) {
 		i := rand.Intn(numLocs)
 		loc := locs[i]
 
-		board.cells[loc.col][loc.row].hasMine = true
+		board.cells[loc].hasMine = true
 
 		locs = append(locs[0:i], locs[i+1:]...)
 
