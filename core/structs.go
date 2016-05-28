@@ -1,6 +1,13 @@
 package core
 
-type cell struct {
+type Cell struct {
+	Col   int
+	Row   int
+	CType CellType
+	CNum  int
+}
+
+type internalCell struct {
 	board              *Board
 	locCol, locRow     int
 	hasMine            bool
@@ -10,7 +17,7 @@ type cell struct {
 
 // Board manages the Mines-Go game, from board to rules.
 type Board struct {
-	cells              []cell
+	cells              []internalCell
 	rowCount, colCount int
 	seed               int64
 }
@@ -23,10 +30,19 @@ func NewBoard(numCols, numRows, numMines int) (board *Board) {
 	return
 }
 
-func newCell(board *Board, locCol, locRow int) (retCell cell) {
+func newInternalCell(board *Board, locCol, locRow int) (retCell internalCell) {
 	retCell.board = board
 	retCell.locCol = locCol
 	retCell.locRow = locRow
+
+	return
+}
+
+func newCell(col, row, cellNum int, cellType CellType) (retCell Cell) {
+	retCell.Col = col
+	retCell.Row = row
+	retCell.CType = cellType
+	retCell.CNum = cellNum
 
 	return
 }

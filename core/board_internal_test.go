@@ -47,6 +47,17 @@ var boardGetIndexFromLocationTests = []struct {
 	{10, 10, 1, 0, 1},
 	{10, 10, 0, 1, 10},
 	{10, 10, 1, 1, 11},
+	{10, 10, 9, 9, 99},
+	{10, 20, 0, 0, 0},
+	{10, 20, 1, 0, 1},
+	{10, 20, 0, 1, 10},
+	{10, 20, 1, 1, 11},
+	{10, 20, 9, 19, 199},
+	{20, 10, 0, 0, 0},
+	{20, 10, 1, 0, 1},
+	{20, 10, 0, 1, 20},
+	{20, 10, 1, 1, 21},
+	{20, 10, 19, 9, 199},
 }
 
 var boardGetLocationFromIndexTests = []struct {
@@ -60,6 +71,17 @@ var boardGetLocationFromIndexTests = []struct {
 	{10, 10, 1, 1, 0},
 	{10, 10, 10, 0, 1},
 	{10, 10, 11, 1, 1},
+	{10, 10, 99, 9, 9},
+	{10, 20, 0, 0, 0},
+	{10, 20, 1, 1, 0},
+	{10, 20, 10, 0, 1},
+	{10, 20, 11, 1, 1},
+	{10, 20, 199, 9, 19},
+	{20, 10, 0, 0, 0},
+	{20, 10, 1, 1, 0},
+	{20, 10, 20, 0, 1},
+	{20, 10, 21, 1, 1},
+	{20, 10, 199, 19, 9},
 }
 
 var boardInitTests = []struct {
@@ -106,7 +128,7 @@ func TestBoardFindProximityMines(t *testing.T) {
 				hasMine = true
 			}
 
-			board.cells[board.getIndexFromLocation(i, j)].hasMine = hasMine
+			board.cells[board.GetIndexFromLocation(i, j)].hasMine = hasMine
 		}
 	}
 
@@ -117,7 +139,7 @@ func TestBoardFindProximityMines(t *testing.T) {
 
 			if expectedMineCount < 9 {
 				board.findProximityMineCount(i, j)
-				actualMineCount := board.cells[board.getIndexFromLocation(i, j)].proximityMineCount
+				actualMineCount := board.cells[board.GetIndexFromLocation(i, j)].proximityMineCount
 
 				if actualMineCount != expectedMineCount {
 					t.Errorf("[%d][%d] Expected %d, found %d.", i, j, expectedMineCount, actualMineCount)
@@ -141,7 +163,7 @@ func TestBoardFindSurroundingCells(t *testing.T) {
 func TestBoardGetIndexFromLocation(t *testing.T) {
 	for _, testData := range boardGetIndexFromLocationTests {
 		board := NewBoard(testData.colCount, testData.rowCount, 10)
-		index := board.getIndexFromLocation(testData.col, testData.row)
+		index := board.GetIndexFromLocation(testData.col, testData.row)
 
 		if index != testData.expectedIndex {
 			t.Errorf("[%d][%d] Expected index %d. Got %d.", testData.col, testData.row, testData.expectedIndex, index)
@@ -152,7 +174,7 @@ func TestBoardGetIndexFromLocation(t *testing.T) {
 func TestBoardGetLocationFromIndex(t *testing.T) {
 	for _, testData := range boardGetLocationFromIndexTests {
 		board := NewBoard(testData.colCount, testData.rowCount, 10)
-		col, row := board.getLocationFromIndex(testData.index)
+		col, row := board.GetLocationFromIndex(testData.index)
 
 		if col != testData.expectedCol || row != testData.expectedRow {
 			t.Errorf("[%d] Expected [%d][%d]. Got [%d][%d].", testData.index, testData.expectedCol, testData.expectedRow, col, row)
@@ -168,7 +190,7 @@ func TestBoardInit(t *testing.T) {
 
 		for i := 0; i < testData.colCount; i++ {
 			for j := 0; j < testData.rowCount; j++ {
-				testCell := board.cells[board.getIndexFromLocation(i, j)]
+				testCell := board.cells[board.GetIndexFromLocation(i, j)]
 
 				if testCell.locCol != i || testCell.locRow != j {
 					t.Errorf("[%d][%d] is [%d][%d].", i, j, testCell.locCol, testCell.locRow)

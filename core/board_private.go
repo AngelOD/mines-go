@@ -18,11 +18,11 @@ func (board *Board) findProximityMineCount(col, row int) {
 		}
 	}
 
-	board.cells[board.getIndexFromLocation(col, row)].proximityMineCount = mineCount
+	board.cells[board.GetIndexFromLocation(col, row)].proximityMineCount = mineCount
 }
 
-func (board *Board) findSurroundingCells(col, row int) []*cell {
-	var cells []*cell
+func (board *Board) findSurroundingCells(col, row int) []*internalCell {
+	var cells []*internalCell
 
 	for curCol := col - 1; curCol <= col+1; curCol++ {
 		for curRow := row - 1; curRow <= row+1; curRow++ {
@@ -30,22 +30,27 @@ func (board *Board) findSurroundingCells(col, row int) []*cell {
 				continue
 			}
 
-			cells = append(cells, &board.cells[board.getIndexFromLocation(curCol, curRow)])
+			cells = append(cells, &board.cells[board.GetIndexFromLocation(curCol, curRow)])
 		}
 	}
 
 	return cells
 }
 
-func (board *Board) getIndexFromLocation(col, row int) (index int) {
-	index = row*board.colCount + col
+func (board *Board) getCellType(col, row int) (cellType CellType, cellNum int) {
+	curCell := board.cells[board.GetIndexFromLocation(col, row)]
 
-	return
-}
+	cellType = NOT_REVEALED
+	cellNum = -1
 
-func (board *Board) getLocationFromIndex(index int) (col, row int) {
-	col = index % board.colCount
-	row = index / board.colCount
+	if curCell.isRevealed {
+		if curCell.hasMine {
+			cellType = HAS_MINE
+		} else {
+			cellType = HAS_NUMBER
+			cellNum = curCell.proximityMineCount
+		}
+	}
 
 	return
 }
@@ -76,11 +81,11 @@ func (board *Board) init(numCols, numRows, numMines int) (err error) {
 }
 
 func (board *Board) initCells() {
-	var cells []cell
+	var cells []internalCell
 	var curCol, curRow int
 
 	for {
-		cells = append(cells, newCell(board, curCol, curRow))
+		cells = append(cells, newInternalCell(board, curCol, curRow))
 
 		curCol++
 		if curCol == board.colCount {
@@ -111,7 +116,7 @@ func (board *Board) placeMines(mineCount int) {
 	// Generate pseudo-set of possible locations
 	for i := 0; i < board.colCount; i++ {
 		for j := 0; j < board.rowCount; j++ {
-			locs = append(locs, board.getIndexFromLocation(i, j))
+			locs = append(locs, board.GetIndexFromLocation(i, j))
 		}
 	}
 
@@ -129,5 +134,32 @@ func (board *Board) placeMines(mineCount int) {
 		locs = append(locs[0:i], locs[i+1:]...)
 
 		minesPlaced++
+	}
+}
+
+func (board *Board) revealCell(col, row int) {
+	curCell := board.cells[board.GetIndexFromLocation(col, row)]
+
+	if curCell.isRevealed {
+		return
+	}
+
+	curCell.isRevealed = true
+
+	if curCell.hasMine {
+		// TODO Consider how to handle this better
+		return
+	}
+
+	board.findProximityMineCount(col, row)
+
+	if curCell.proximityMineCount > 0 {
+		return
+	}
+
+	surroundingCells := board.findSurroundingCells(col, row)
+
+	for _, otherCell := range surroundingCells {
+		board.revealCell(otherCell.locCol, otherCell.locRow)
 	}
 }
