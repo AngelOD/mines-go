@@ -4,6 +4,23 @@ import (
 	"testing"
 )
 
+var boardFindCellTypeTests = []struct {
+	revealFirst      bool
+	col              int
+	row              int
+	expectedCellType CellType
+	expectedCellNum  int
+}{
+	{true, 0, 0, HAS_MINE, -1},
+	{true, 1, 1, HAS_NUMBER, 8},
+	{true, 0, 9, HAS_NUMBER, 0},
+	{true, 9, 9, HAS_NUMBER, 0},
+	{true, 9, 7, HAS_NUMBER, 1},
+	{true, 9, 5, HAS_MINE, -1},
+	{false, 3, 3, NOT_REVEALED, -1},
+	{false, 9, 0, NOT_REVEALED, -1},
+}
+
 // 0-8: Expected number
 // 9: Bomb
 var boardFindProximityMineCountTestLayout = [][]int{
@@ -115,26 +132,38 @@ var boardIsValidCoordTests = []struct {
 	{10, 10, 10, 10, false},
 }
 
-func TestBoardFindProximityMines(t *testing.T) {
-	var colCount, rowCount int = 10, 10
+func TestBoardFindCellType(t *testing.T) {
+	var board *Board
 
-	board := NewBoard(colCount, rowCount, 1)
+	board = setupTestBoard()
 
-	// Reset board so we have full control over it
-	for i := 0; i < colCount; i++ {
-		for j := 0; j < rowCount; j++ {
-			hasMine := false
-			if boardFindProximityMineCountTestLayout[j][i] == 9 {
-				hasMine = true
-			}
+	for _, testData := range boardFindCellTypeTests {
+		if testData.revealFirst {
+			board.revealCell(testData.col, testData.row)
+		}
 
-			board.cells[board.GetIndexFromLocation(i, j)].hasMine = hasMine
+		board.findCellType(testData.col, testData.row)
+
+		actualCellType := board.cells[board.GetIndexFromLocation(testData.col, testData.row)].CType
+		actualCellNum := board.cells[board.GetIndexFromLocation(testData.col, testData.row)].CNum
+
+		if actualCellNum != testData.expectedCellNum || actualCellType != testData.expectedCellType {
+			t.Errorf("[%d][%d] Expected (%d)(%d). Got (%d)(%d).",
+				testData.col, testData.row,
+				testData.expectedCellType, testData.expectedCellNum,
+				actualCellType, actualCellNum)
 		}
 	}
+}
+
+func TestBoardFindProximityMines(t *testing.T) {
+	var board *Board
+
+	board = setupTestBoard()
 
 	// Run actual test
-	for i := 0; i < colCount; i++ {
-		for j := 0; j < rowCount; j++ {
+	for i := 0; i < board.colCount; i++ {
+		for j := 0; j < board.rowCount; j++ {
 			expectedMineCount := boardFindProximityMineCountTestLayout[j][i]
 
 			if expectedMineCount < 9 {
@@ -192,8 +221,8 @@ func TestBoardInit(t *testing.T) {
 			for j := 0; j < testData.rowCount; j++ {
 				testCell := board.cells[board.GetIndexFromLocation(i, j)]
 
-				if testCell.locCol != i || testCell.locRow != j {
-					t.Errorf("[%d][%d] is [%d][%d].", i, j, testCell.locCol, testCell.locRow)
+				if testCell.Col != i || testCell.Row != j {
+					t.Errorf("[%d][%d] is [%d][%d].", i, j, testCell.Col, testCell.Row)
 				}
 
 				if testCell.hasMine {
@@ -217,4 +246,25 @@ func TestBoardIsValidCoord(t *testing.T) {
 			t.Errorf("Expected [%d][%d] to be %t, but it wasn't.", testData.col, testData.row, testData.expected)
 		}
 	}
+}
+
+// ====================== HELPER METHODS ======================
+
+func setupTestBoard() (board *Board) {
+	var colCount, rowCount int = len(boardFindProximityMineCountTestLayout), len(boardFindProximityMineCountTestLayout[0])
+	board = NewBoard(colCount, rowCount, 1)
+
+	// Reset board to our desired layout
+	for i := 0; i < colCount; i++ {
+		for j := 0; j < rowCount; j++ {
+			hasMine := false
+			if boardFindProximityMineCountTestLayout[j][i] == 9 {
+				hasMine = true
+			}
+
+			board.cells[board.GetIndexFromLocation(i, j)].hasMine = hasMine
+		}
+	}
+
+	return
 }

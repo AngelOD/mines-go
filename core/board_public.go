@@ -1,27 +1,25 @@
 package core
 
-// Click takes care of revealing fields that are hidden,
-func (board *Board) Click(col, row int) (err error) {
+// Click handles "click"-style events for cells, revealing hidden fields,
+// including cascading reveals.
+func (board *Board) Click(col, row int) (numChanges int) {
+	numChanges = 0
+
 	if board.cells[board.GetIndexFromLocation(col, row)].isRevealed {
-		err = nil
 		return
 	}
+
+	numChanges = board.revealCell(col, row)
 
 	return
 }
 
-func (board *Board) GetBoard() (cells []Cell) {
-	var cellNum int
-	var cellType CellType
-
-	cells = make([]Cell, 0)
-
+func (board *Board) GetBoard() []Cell {
 	for _, curCell := range board.cells {
-		cellType, cellNum = board.getCellType(curCell.locCol, curCell.locRow)
-		cells = append(cells, newCell(curCell.locCol, curCell.locRow, cellNum, cellType))
+		board.findCellType(curCell.Col, curCell.Row)
 	}
 
-	return
+	return board.cells
 }
 
 func (board *Board) GetIndexFromLocation(col, row int) (index int) {

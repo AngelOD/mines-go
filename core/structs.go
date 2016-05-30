@@ -5,11 +5,9 @@ type Cell struct {
 	Row   int
 	CType CellType
 	CNum  int
-}
 
-type internalCell struct {
 	board              *Board
-	locCol, locRow     int
+	checked            bool
 	hasMine            bool
 	isRevealed         bool
 	proximityMineCount int
@@ -17,7 +15,7 @@ type internalCell struct {
 
 // Board manages the Mines-Go game, from board to rules.
 type Board struct {
-	cells              []internalCell
+	cells              []Cell
 	rowCount, colCount int
 	seed               int64
 }
@@ -30,10 +28,10 @@ func NewBoard(numCols, numRows, numMines int) (board *Board) {
 	return
 }
 
-func newInternalCell(board *Board, locCol, locRow int) (retCell internalCell) {
+func newInternalCell(board *Board, col, row int) (retCell Cell) {
 	retCell.board = board
-	retCell.locCol = locCol
-	retCell.locRow = locRow
+	retCell.Col = col
+	retCell.Row = row
 
 	return
 }

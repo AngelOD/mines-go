@@ -7,6 +7,24 @@ import (
 	"time"
 )
 
+func (board *Board) findCellType(col, row int) {
+	curCell := &board.cells[board.GetIndexFromLocation(col, row)]
+	cellType := NOT_REVEALED
+	cellNum := -1
+
+	if curCell.isRevealed {
+		if curCell.hasMine {
+			cellType = HAS_MINE
+		} else {
+			cellType = HAS_NUMBER
+			cellNum = curCell.proximityMineCount
+		}
+	}
+
+	curCell.CType = cellType
+	curCell.CNum = cellNum
+}
+
 func (board *Board) findProximityMineCount(col, row int) {
 	var mineCount int
 
@@ -21,8 +39,8 @@ func (board *Board) findProximityMineCount(col, row int) {
 	board.cells[board.GetIndexFromLocation(col, row)].proximityMineCount = mineCount
 }
 
-func (board *Board) findSurroundingCells(col, row int) []*internalCell {
-	var cells []*internalCell
+func (board *Board) findSurroundingCells(col, row int) []*Cell {
+	var cells []*Cell
 
 	for curCol := col - 1; curCol <= col+1; curCol++ {
 		for curRow := row - 1; curRow <= row+1; curRow++ {
@@ -35,24 +53,6 @@ func (board *Board) findSurroundingCells(col, row int) []*internalCell {
 	}
 
 	return cells
-}
-
-func (board *Board) getCellType(col, row int) (cellType CellType, cellNum int) {
-	curCell := board.cells[board.GetIndexFromLocation(col, row)]
-
-	cellType = NOT_REVEALED
-	cellNum = -1
-
-	if curCell.isRevealed {
-		if curCell.hasMine {
-			cellType = HAS_MINE
-		} else {
-			cellType = HAS_NUMBER
-			cellNum = curCell.proximityMineCount
-		}
-	}
-
-	return
 }
 
 func (board *Board) init(numCols, numRows, numMines int) (err error) {
@@ -81,7 +81,7 @@ func (board *Board) init(numCols, numRows, numMines int) (err error) {
 }
 
 func (board *Board) initCells() {
-	var cells []internalCell
+	var cells []Cell
 	var curCol, curRow int
 
 	for {
@@ -137,14 +137,17 @@ func (board *Board) placeMines(mineCount int) {
 	}
 }
 
-func (board *Board) revealCell(col, row int) {
-	curCell := board.cells[board.GetIndexFromLocation(col, row)]
+// TODO Switch this over to use a set instead, so it doesn't check the same
+//      fields over and over.
+func (board *Board) revealCell(col, row int) (changeCount int) {
+	curCell := &board.cells[board.GetIndexFromLocation(col, row)]
 
 	if curCell.isRevealed {
 		return
 	}
 
 	curCell.isRevealed = true
+	changeCount = 1
 
 	if curCell.hasMine {
 		// TODO Consider how to handle this better
@@ -160,6 +163,11 @@ func (board *Board) revealCell(col, row int) {
 	surroundingCells := board.findSurroundingCells(col, row)
 
 	for _, otherCell := range surroundingCells {
-		board.revealCell(otherCell.locCol, otherCell.locRow)
+		if !otherCell.checked {
+			otherCell.checked = true
+			changeCount += board.revealCell(otherCell.Col, otherCell.Row)
+		}
 	}
+
+	return
 }
