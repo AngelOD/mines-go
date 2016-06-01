@@ -137,8 +137,6 @@ func (board *Board) placeMines(mineCount int) {
 	}
 }
 
-// TODO Switch this over to use a set instead, so it doesn't check the same
-//      fields over and over.
 func (board *Board) revealCell(col, row int) (changeCount int) {
 	curCell := &board.cells[board.GetIndexFromLocation(col, row)]
 
@@ -150,7 +148,7 @@ func (board *Board) revealCell(col, row int) (changeCount int) {
 	changeCount = 1
 
 	if curCell.hasMine {
-		// TODO Consider how to handle this better
+		// TODO Consider if this needs better handling
 		return
 	}
 
@@ -163,7 +161,7 @@ func (board *Board) revealCell(col, row int) (changeCount int) {
 	surroundingCells := board.findSurroundingCells(col, row)
 
 	for _, otherCell := range surroundingCells {
-		if !otherCell.checked {
+		if !otherCell.checked && (otherCell.Col == curCell.Col || otherCell.Row == curCell.Row) {
 			otherCell.checked = true
 			changeCount += board.revealCell(otherCell.Col, otherCell.Row)
 		}

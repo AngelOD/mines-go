@@ -4,6 +4,13 @@ import (
 	"testing"
 )
 
+type cellCheckEntry struct {
+	checkCol         int
+	checkRow         int
+	expectedCellType CellType
+	expectedCellNum  int
+}
+
 var boardFindCellTypeTests = []struct {
 	revealFirst      bool
 	col              int
@@ -23,7 +30,7 @@ var boardFindCellTypeTests = []struct {
 
 // 0-8: Expected number
 // 9: Bomb
-var boardFindProximityMineCountTestLayout = [][]int{
+var boardTestLayout = [][]int{
 	{9, 9, 9, 9, 9, 9, 9, 9, 9, 9},
 	{9, 8, 9, 7, 6, 5, 6, 9, 9, 4},
 	{9, 9, 9, 9, 9, 9, 3, 9, 9, 2},
@@ -132,6 +139,39 @@ var boardIsValidCoordTests = []struct {
 	{10, 10, 10, 10, false},
 }
 
+var boardRevealCellTests = []struct {
+	revealCol  int
+	revealRow  int
+	checkPairs []cellCheckEntry
+}{
+	{0, 0, []cellCheckEntry{
+		{0, 0, HAS_MINE, -1},
+		{1, 0, NOT_REVEALED, -1},
+		{0, 1, NOT_REVEALED, -1},
+		{1, 1, NOT_REVEALED, -1},
+	}},
+	{0, 9, []cellCheckEntry{
+		{0, 9, HAS_NUMBER, 0},
+		{0, 8, HAS_NUMBER, 0},
+		{0, 7, HAS_NUMBER, 2},
+		{0, 6, NOT_REVEALED, -1},
+		{1, 9, HAS_NUMBER, 0},
+		{1, 8, HAS_NUMBER, 0},
+		{1, 7, HAS_NUMBER, 3},
+		{1, 6, NOT_REVEALED, -1},
+		{2, 9, HAS_NUMBER, 0},
+		{2, 8, HAS_NUMBER, 0},
+		{2, 7, HAS_NUMBER, 2},
+		{2, 6, NOT_REVEALED, -1},
+		{3, 9, HAS_NUMBER, 1},
+		{3, 8, HAS_NUMBER, 1},
+		{3, 7, NOT_REVEALED, -1},
+		{4, 9, NOT_REVEALED, -1},
+		{4, 8, NOT_REVEALED, -1},
+		{4, 7, NOT_REVEALED, -1},
+	}},
+}
+
 func TestBoardFindCellType(t *testing.T) {
 	var board *Board
 
@@ -164,7 +204,7 @@ func TestBoardFindProximityMines(t *testing.T) {
 	// Run actual test
 	for i := 0; i < board.colCount; i++ {
 		for j := 0; j < board.rowCount; j++ {
-			expectedMineCount := boardFindProximityMineCountTestLayout[j][i]
+			expectedMineCount := boardTestLayout[j][i]
 
 			if expectedMineCount < 9 {
 				board.findProximityMineCount(i, j)
@@ -248,17 +288,39 @@ func TestBoardIsValidCoord(t *testing.T) {
 	}
 }
 
+func TestBoardRevealCell(t *testing.T) {
+	for _, testData := range boardRevealCellTests {
+		board := setupTestBoard()
+		board.revealCell(testData.revealCol, testData.revealRow)
+
+		for _, cellData := range testData.checkPairs {
+			board.findCellType(cellData.checkCol, cellData.checkRow)
+
+			testCell := &board.cells[board.GetIndexFromLocation(cellData.checkCol, cellData.checkRow)]
+			actualCellType := testCell.CType
+			actualCellNum := testCell.CNum
+
+			if actualCellType != cellData.expectedCellType || actualCellNum != cellData.expectedCellNum {
+				t.Errorf("[%d][%d] Expected (%d)(%d). Got (%d)(%d).",
+					cellData.checkCol, cellData.checkRow,
+					cellData.expectedCellType, cellData.expectedCellNum,
+					actualCellType, actualCellNum)
+			}
+		}
+	}
+}
+
 // ====================== HELPER METHODS ======================
 
 func setupTestBoard() (board *Board) {
-	var colCount, rowCount int = len(boardFindProximityMineCountTestLayout), len(boardFindProximityMineCountTestLayout[0])
+	var colCount, rowCount int = len(boardTestLayout), len(boardTestLayout[0])
 	board = NewBoard(colCount, rowCount, 1)
 
 	// Reset board to our desired layout
 	for i := 0; i < colCount; i++ {
 		for j := 0; j < rowCount; j++ {
 			hasMine := false
-			if boardFindProximityMineCountTestLayout[j][i] == 9 {
+			if boardTestLayout[j][i] == 9 {
 				hasMine = true
 			}
 
