@@ -68,14 +68,14 @@ func (board *Board) init(numCols, numRows, numMines int) (err error) {
 		return
 	}
 
-	// Instantiate board and all cells
 	board.colCount = numCols
 	board.rowCount = numRows
 
 	board.initCells()
 
-	// Fill with desired number of mines
 	board.placeMines(numMines)
+
+	board.gameStatus = GAME_RUNNING
 
 	return
 }
@@ -121,7 +121,9 @@ func (board *Board) placeMines(mineCount int) {
 	}
 
 	// Seed the randomizer
-	board.seed = time.Now().UnixNano()
+	if board.seed == 0 {
+		board.seed = time.Now().UnixNano()
+	}
 	rand.Seed(board.seed)
 
 	for minesPlaced < mineCount {
@@ -149,6 +151,7 @@ func (board *Board) revealCell(col, row int) (changeCount int) {
 
 	if curCell.hasMine {
 		// TODO Consider if this needs better handling
+		board.gameStatus = GAME_LOST
 		return
 	}
 

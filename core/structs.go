@@ -18,11 +18,23 @@ type Board struct {
 	cells              []Cell
 	rowCount, colCount int
 	seed               int64
+	gameStatus         GameStatus
 }
 
-// NewBoard instantiates a new Board and returns a pointer to it.
+// NewBoard instantiates a new Board with a random seed and returns a pointer
+// to it.
 func NewBoard(numCols, numRows, numMines int) (board *Board) {
 	board = new(Board)
+	board.init(numCols, numRows, numMines)
+
+	return
+}
+
+// NewBoardWithSeed instantiates a new Board with a specific seed and returns a
+// pointer to it.
+func NewBoardWithSeed(numCols, numRows, numMines int, seed int64) (board *Board) {
+	board = new(Board)
+	board.seed = seed
 	board.init(numCols, numRows, numMines)
 
 	return
