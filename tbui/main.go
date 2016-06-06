@@ -4,6 +4,7 @@
 package main
 
 import (
+	"flag"
 	"time"
 
 	minesCore "github.com/angelod/mines-go/core"
@@ -15,6 +16,10 @@ const (
 )
 
 func main() {
+	mineCount := flag.Int("mines", 10, "The number of mines to start with.")
+
+	flag.Parse()
+
 	err := termbox.Init()
 	if err != nil {
 		panic(err)
@@ -28,7 +33,7 @@ func main() {
 		}
 	}()
 
-	g := NewGame(30, 20, 10)
+	g := NewGame(30, 20, *mineCount)
 	render(g)
 
 	for {

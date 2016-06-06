@@ -85,7 +85,7 @@ func (g *Game) nextLevel() {
 	mineCount := g.numMines
 	maxMineCount := g.board.GetMaxMineCount()
 
-	if mineCount < maxMineCount {
+	if g.status == minesCore.GAME_WON && mineCount < maxMineCount {
 		mineCount++
 	}
 
