@@ -1,5 +1,9 @@
 package core
 
+import (
+	"math"
+)
+
 // ===== Public =====
 
 func (board *Board) GetGameStatus() GameStatus {
@@ -39,4 +43,8 @@ func (board *Board) GetLocationFromIndex(index int) (col, row int) {
 	row = index / board.colCount
 
 	return
+}
+
+func (board *Board) GetMaxMineCount() int {
+	return int(math.Floor((float64(board.colCount) * float64(board.rowCount)) * float64(0.9)))
 }

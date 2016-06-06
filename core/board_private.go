@@ -2,7 +2,6 @@ package core
 
 import (
 	"fmt"
-	"math"
 	"math/rand"
 	"time"
 )
@@ -61,15 +60,15 @@ func (board *Board) init(numCols, numRows, numMines int) (err error) {
 		return
 	}
 
-	maxMines := int(math.Floor((float64(numCols) * float64(numRows)) * float64(0.9)))
+	board.colCount = numCols
+	board.rowCount = numRows
+
+	maxMines := board.GetMaxMineCount()
 
 	if numMines < 1 || numMines > maxMines {
 		err = fmt.Errorf("There must be between 1 and %d mines for a grid of this size.", maxMines)
 		return
 	}
-
-	board.colCount = numCols
-	board.rowCount = numRows
 
 	board.initCells()
 
