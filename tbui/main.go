@@ -6,6 +6,7 @@ package main
 import (
 	"time"
 
+	minesCore "github.com/angelod/mines-go/core"
 	"github.com/nsf/termbox-go"
 )
 
@@ -27,7 +28,7 @@ func main() {
 		}
 	}()
 
-	g := NewGame(10, 10, 10)
+	g := NewGame(30, 20, 10)
 	render(g)
 
 	for {
@@ -42,8 +43,14 @@ func main() {
 				g.move(LEFT)
 			case ev.Key == termbox.KeyArrowRight || ev.Ch == 'd':
 				g.move(RIGHT)
+			case ev.Ch == 'c':
+				g.toggleDebug()
 			case ev.Key == termbox.KeySpace:
-				g.reveal()
+				if g.status == minesCore.GAME_RUNNING {
+					g.reveal()
+				} else {
+					g.nextLevel()
+				}
 			case ev.Key == termbox.KeyEsc:
 				return
 			}

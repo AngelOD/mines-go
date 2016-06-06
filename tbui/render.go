@@ -48,6 +48,7 @@ var instructions = []string{
 	"← or a    :move left",
 	"↑ or w    :move up",
 	"↓ or s    :move down",
+	"space     :reveal",
 	"     c    :show debug console",
 	"     esc  :quit",
 	"",
@@ -97,13 +98,17 @@ func render(g *Game) {
 			printText(x, y+i, textColor, backgroundColor, msg)
 		}
 	} else {
-		printBox(x, y, 20, 5, textColor, backgroundColor)
+		textToPrint := ""
+		textFg, textBg := textColor, backgroundColor
 
 		if g.status == minesCore.GAME_LOST {
-			printText(x+2, y+2, termbox.ColorCyan, termbox.ColorRed, "GAME OVER!")
+			textToPrint = "GAME OVER!"
+			textFg, textBg = termbox.ColorWhite, termbox.ColorRed
 		} else {
-			printText(x+2, y+2, termbox.ColorBlack, termbox.ColorGreen, "YOU WON!")
+			textToPrint = "YOU WON!"
+			textFg, textBg = termbox.ColorBlack, termbox.ColorGreen
 		}
+		printTextBox(x, y, textColor, backgroundColor, textFg, textBg, textToPrint)
 	}
 
 	termbox.Flush()
@@ -146,4 +151,12 @@ func printBox(x, y, w, h int, fg, bg termbox.Attribute) {
 
 		printText(ulx, curLine, fg, bg, buf.String())
 	}
+}
+
+func printTextBox(x, y int, boxFg, boxBg, textFg, textBg termbox.Attribute, msg string) {
+	width, height := len(msg)+4, 5
+	textX, textY := x+2, y+2
+
+	printBox(x, y, width, height, boxFg, boxBg)
+	printText(textX, textY, textFg|termbox.AttrBold, textBg, msg)
 }

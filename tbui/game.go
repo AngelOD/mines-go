@@ -80,3 +80,16 @@ func (g *Game) toggleDebug() bool {
 func (g *Game) reveal() {
 	_, g.status = g.board.Click(g.curCol, g.curRow)
 }
+
+func (g *Game) nextLevel() {
+	mineCount := g.numMines
+	maxMineCount := g.board.GetMaxMineCount()
+
+	if mineCount < maxMineCount {
+		mineCount++
+	}
+
+	g.numMines = mineCount
+	g.board = minesCore.NewBoard(g.numCols, g.numRows, g.numMines)
+	g.status = g.board.GetGameStatus()
+}
