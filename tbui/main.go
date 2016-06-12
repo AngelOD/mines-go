@@ -39,29 +39,15 @@ func main() {
 	for {
 		ev := <-eventQueue
 		if ev.Type == termbox.EventKey {
-			switch {
-			case ev.Key == termbox.KeyArrowUp || ev.Ch == 'w':
-				g.move(UP)
-			case ev.Key == termbox.KeyArrowDown || ev.Ch == 's':
-				g.move(DOWN)
-			case ev.Key == termbox.KeyArrowLeft || ev.Ch == 'a':
-				g.move(LEFT)
-			case ev.Key == termbox.KeyArrowRight || ev.Ch == 'd':
-				g.move(RIGHT)
-			case ev.Ch == 'c':
-				g.toggleDebug()
-			case ev.Key == termbox.KeySpace:
-				if g.status == minesCore.GAME_RUNNING {
-					g.reveal()
-				} else {
-					g.nextLevel()
-				}
-			case ev.Key == termbox.KeyEsc:
-				return
-			}
+			g.processKeyEvent(ev)
 		}
 
 		render(g)
+
+		if g.fsm.Current() == "quitting" {
+			return
+		}
+
 		time.Sleep(animationSpeed)
 	}
 }

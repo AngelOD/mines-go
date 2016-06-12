@@ -2,6 +2,7 @@ package main
 
 import (
 	minesCore "github.com/angelod/mines-go/core"
+	"github.com/looplab/fsm"
 )
 
 type Direction int
@@ -14,6 +15,7 @@ const (
 )
 
 type Game struct {
+	fsm      *fsm.FSM
 	board    *minesCore.Board
 	status   minesCore.GameStatus
 	curCol   int
@@ -33,6 +35,9 @@ func NewGame(colCount, rowCount, mineCount int) *Game {
 		status:   minesCore.GAME_RUNNING,
 		debug:    false,
 	}
+
+	g.initFSM()
+
 	return g
 }
 
