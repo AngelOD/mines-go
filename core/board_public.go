@@ -15,3 +15,18 @@ func (board *Board) Click(col, row int) (numChanges int, gameStatus GameStatus) 
 
 	return
 }
+
+func (board *Board) RevealAllMines() bool {
+	if board.gameStatus == GAME_RUNNING {
+		return false
+	}
+
+	for _, curCell := range board.cells {
+		if curCell.hasMine {
+			curCell.isRevealed = true
+			board.findCellType(curCell.Col, curCell.Row)
+		}
+	}
+
+	return true
+}
