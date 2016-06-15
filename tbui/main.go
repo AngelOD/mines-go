@@ -1,4 +1,6 @@
-// Test of Termbox-Go, heavily inspired by
+// Termbox-Go UI for my Minesweeper core (github.com/angelod/mines-go/core)
+//
+// Heavily inspired by
 //   https://github.com/rn2dy/sokoban-go
 
 package main
@@ -7,12 +9,15 @@ import (
 	"flag"
 	"time"
 
-	minesCore "github.com/angelod/mines-go/core"
 	"github.com/nsf/termbox-go"
 )
 
 const (
 	animationSpeed = 10 * time.Millisecond
+)
+
+var (
+	eventQueue chan termbox.Event
 )
 
 func main() {
@@ -26,13 +31,20 @@ func main() {
 	}
 	defer termbox.Close()
 
-	eventQueue := make(chan termbox.Event)
+	initEventQueue()
+	mainLoop(mineCount)
+}
+
+func initEventQueue() {
+	eventQueue = make(chan termbox.Event)
 	go func() {
 		for {
 			eventQueue <- termbox.PollEvent()
 		}
 	}()
+}
 
+func mainLoop(mineCount *int) {
 	g := NewGame(30, 20, *mineCount)
 	render(g)
 

@@ -14,7 +14,14 @@ func (g *Game) initFSM() {
 			{Name: "start_game", Src: []string{"finished"}, Dst: "running"},
 			{Name: "quit", Src: []string{"running", "finished"}, Dst: "quitting"},
 		},
-		fsm.Callbacks{},
+		fsm.Callbacks{
+			"after_game_won": func(e *fsm.Event) {
+				g.gameWon = true
+			},
+			"enter_running": func(e *fsm.Event) {
+				g.gameWon = false
+			},
+		},
 	)
 }
 

@@ -17,10 +17,10 @@ const (
 type Game struct {
 	fsm      *fsm.FSM
 	board    *minesCore.Board
-	status   minesCore.GameStatus
 	curCol   int
 	curRow   int
 	debug    bool
+	gameWon  bool
 	numCols  int
 	numRows  int
 	numMines int
@@ -32,7 +32,6 @@ func NewGame(colCount, rowCount, mineCount int) *Game {
 		numRows:  rowCount,
 		numMines: mineCount,
 		board:    minesCore.NewBoard(colCount, rowCount, mineCount),
-		status:   minesCore.GAME_RUNNING,
 		debug:    false,
 	}
 
@@ -61,7 +60,7 @@ func (g *Game) checkMove(dx, dy int) {
 }
 
 func (g *Game) move(dir Direction) {
-	if g.status != minesCore.GAME_RUNNING {
+	if !g.fsm.Is("running") {
 		return
 	}
 
@@ -83,18 +82,26 @@ func (g *Game) toggleDebug() bool {
 }
 
 func (g *Game) reveal() {
-	_, g.status = g.board.Click(g.curCol, g.curRow)
+	_, gameStatus := g.board.Click(g.curCol, g.curRow)
+
+	switch gameStatus {
+	case minesCore.GAME_LOST:
+		g.fsm.Event("game_lost")
+
+	case minesCore.GAME_WON:
+		g.fsm.Event("game_won")
+	}
 }
 
 func (g *Game) nextLevel() {
 	mineCount := g.numMines
 	maxMineCount := g.board.GetMaxMineCount()
 
-	if g.status == minesCore.GAME_WON && mineCount < maxMineCount {
+	if g.fsm.Is("finished") && g.gameWon && mineCount < maxMineCount {
 		mineCount++
 	}
 
 	g.numMines = mineCount
 	g.board = minesCore.NewBoard(g.numCols, g.numRows, g.numMines)
-	g.status = g.board.GetGameStatus()
+	g.fsm.Event("start_game")
 }

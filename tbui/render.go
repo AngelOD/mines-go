@@ -93,7 +93,7 @@ func render(g *Game) {
 
 	x = instructionStartX + g.numCols + 4
 	y = instructionStartY
-	if g.status == minesCore.GAME_RUNNING {
+	if g.fsm.Is("running") {
 		for i, msg := range instructions {
 			printText(x, y+i, textColor, backgroundColor, msg)
 		}
@@ -101,7 +101,7 @@ func render(g *Game) {
 		textToPrint := ""
 		textFg, textBg := textColor, backgroundColor
 
-		if g.status == minesCore.GAME_LOST {
+		if g.fsm.Is("finished") && !g.gameWon {
 			textToPrint = "GAME OVER!"
 			textFg, textBg = termbox.ColorWhite, termbox.ColorRed
 		} else {
