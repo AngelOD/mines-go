@@ -9,6 +9,7 @@ type Cell struct {
 	board              *Board
 	checked            bool
 	hasMine            bool
+	isMarked           bool
 	isRevealed         bool
 	proximityMineCount int
 }

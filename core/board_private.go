@@ -18,6 +18,8 @@ func (board *Board) findCellType(col, row int) {
 			cellType = HAS_NUMBER
 			cellNum = curCell.proximityMineCount
 		}
+	} else if curCell.isMarked {
+		cellType = IS_MARKED
 	}
 
 	curCell.CType = cellType
@@ -142,6 +144,11 @@ func (board *Board) revealCell(col, row int) (changeCount int) {
 	curCell := &board.cells[board.GetIndexFromLocation(col, row)]
 
 	if curCell.isRevealed {
+		return
+	}
+
+	if curCell.isMarked {
+		curCell.isMarked = false
 		return
 	}
 

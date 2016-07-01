@@ -16,6 +16,22 @@ func (board *Board) Click(col, row int) (numChanges int, gameStatus GameStatus) 
 	return
 }
 
+func (board *Board) MarkCell(col, row int) bool {
+	if board.gameStatus != GAME_RUNNING {
+		return false
+	}
+
+	cellIndex := board.GetIndexFromLocation(col, row)
+
+	if board.cells[cellIndex].isRevealed {
+		return false
+	}
+
+	board.cells[cellIndex].isMarked = !board.cells[cellIndex].isMarked
+
+	return true
+}
+
 func (board *Board) RevealAllMines() bool {
 	if board.gameStatus == GAME_RUNNING {
 		return false
