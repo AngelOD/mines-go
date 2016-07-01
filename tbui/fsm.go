@@ -43,7 +43,7 @@ func (g *Game) processKeyEvent(ev termbox.Event) {
 		case ev.Key == termbox.KeySpace:
 			g.reveal()
 		case ev.Key == termbox.KeyEsc:
-			return
+			g.fsm.Event("quit")
 		}
 	} else if curState == "finished" {
 		switch {
@@ -52,7 +52,7 @@ func (g *Game) processKeyEvent(ev termbox.Event) {
 		case ev.Key == termbox.KeySpace:
 			g.nextLevel()
 		case ev.Key == termbox.KeyEsc:
-			return
+			g.fsm.Event("quit")
 		}
 	}
 }
