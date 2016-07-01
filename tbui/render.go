@@ -49,6 +49,7 @@ var instructions = []string{
 	"↑ or w    :move up",
 	"↓ or s    :move down",
 	"space     :reveal",
+	"x         :(un)mark cell",
 	"     c    :show debug console",
 	"     esc  :quit",
 	"",
@@ -82,6 +83,9 @@ func render(g *Game) {
 			if cell.CNum > 0 {
 				cellRune = rune(strconv.Itoa(cell.CNum)[0])
 			}
+		case minesCore.IS_MARKED:
+			cellToken = 'm'
+			cellRune = '?'
 		}
 
 		if cell.Col == g.curCol && cell.Row == g.curRow {

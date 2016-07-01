@@ -93,6 +93,10 @@ func (g *Game) reveal() {
 	}
 }
 
+func (g *Game) markCell() {
+	g.board.MarkCell(g.curCol, g.curRow)
+}
+
 func (g *Game) nextLevel() {
 	mineCount := g.numMines
 	maxMineCount := g.board.GetMaxMineCount()

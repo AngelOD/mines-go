@@ -42,6 +42,8 @@ func (g *Game) processKeyEvent(ev termbox.Event) {
 			g.toggleDebug()
 		case ev.Key == termbox.KeySpace:
 			g.reveal()
+		case ev.Ch == 'x':
+			g.markCell()
 		case ev.Key == termbox.KeyEsc:
 			g.fsm.Event("quit")
 		}
